@@ -36,9 +36,19 @@ type effectiveAccessRequest struct {
 	request *AccessRequest
 }
 
+// NewPBAC creates a new PBAC
+func NewPBAC(policy *[]AccessStatement) *PBAC {
+	return &PBAC{policy: policy}
+}
+
 // PBAC policy based access control
 type PBAC struct {
-	Policy *[]AccessStatement
+	policy *[]AccessStatement
+}
+
+// SetPolicy updates the policy
+func (c *PBAC) SetPolicy(policy *[]AccessStatement) {
+	c.policy = policy
 }
 
 // Evaluate evaluates the access request against the policy
@@ -69,12 +79,12 @@ func (c *PBAC) matchStatements(req *effectiveAccessRequest) bool {
 	if err != nil {
 		return false
 	}
-	if c.Policy == nil {
+	if c.policy == nil {
 		return false
 	}
 
 	// dereference pointer
-	policy := *c.Policy
+	policy := *c.policy
 	for _, s := range policy {
 		actions, err := arrayify(s.Action)
 		if err != nil {

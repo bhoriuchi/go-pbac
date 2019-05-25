@@ -99,13 +99,17 @@ var req3JSON = `
 `
 
 func TestPBAC(t *testing.T) {
-	pbac := PBAC{}
+	policy := make([]AccessStatement, 0)
+	json.Unmarshal([]byte(policyJSON), &policy)
+	pbac := NewPBAC(&policy)
+
 	req1 := AccessRequest{}
-	req2 := AccessRequest{}
-	req3 := AccessRequest{}
-	json.Unmarshal([]byte(policyJSON), &pbac.Policy)
 	json.Unmarshal([]byte(req1JSON), &req1)
+
+	req2 := AccessRequest{}
 	json.Unmarshal([]byte(req2JSON), &req2)
+
+	req3 := AccessRequest{}
 	json.Unmarshal([]byte(req3JSON), &req3)
 
 	allow1 := pbac.Evaluate(&req1)
