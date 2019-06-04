@@ -14,6 +14,25 @@ const (
 	DenyEffect = "deny"
 )
 
+// AccessPolicyCollection a collection of access policies
+type AccessPolicyCollection []AccessPolicy
+
+// FlattenStatements produces a flat attay of access statements
+func (c *AccessPolicyCollection) FlattenStatements() *[]AccessStatement {
+	statements := make([]AccessStatement, 0)
+	collection := *c
+	for _, policy := range collection {
+		statements = append(statements, policy.Statement...)
+	}
+	return &statements
+}
+
+// AccessPolicy defines an access policy containing one or more access statements
+type AccessPolicy struct {
+	Version   string            `json:"version" yaml:"version"`
+	Statement []AccessStatement `json:"statement" yaml:"statement"`
+}
+
 // AccessStatement an access policy statement
 type AccessStatement struct {
 	ID        string      `json:"id" yaml:"id"`
