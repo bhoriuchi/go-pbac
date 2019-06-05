@@ -29,8 +29,37 @@ func (c *AccessPolicyCollection) FlattenStatements() *[]AccessStatement {
 
 // AccessPolicy defines an access policy containing one or more access statements
 type AccessPolicy struct {
+	ID        string            `json:"id" yaml:"id"`
+	Name      string            `json:"name" yaml:"name"`
 	Version   string            `json:"version" yaml:"version"`
 	Statement []AccessStatement `json:"statement" yaml:"statement"`
+}
+
+// AccessPolicyMutation defines a mutation of an access policy
+type AccessPolicyMutation struct {
+	Name      string                    `json:"name" yaml:"name"`
+	Version   string                    `json:"version" yaml:"version"`
+	Statement []AccessStatementMutation `json:"statement" yaml:"statement"`
+}
+
+// ValidateCreate validates an AccessPolicy create document
+func (c *AccessPolicyMutation) ValidateCreate() error {
+	if c.Name == "" {
+		return fmt.Errorf("required field %q not specified", "name")
+	}
+	if c.Version == "" {
+		return fmt.Errorf("required field %q not specified", "version")
+	}
+	if len(c.Statement) == 0 {
+		return fmt.Errorf("no statements were specified")
+	}
+	for i, s := range c.Statement {
+		if err := s.ValidateCreate(); err != nil {
+			return fmt.Errorf("statement %d: %s", i, err.Error())
+		}
+	}
+
+	return nil
 }
 
 // AccessStatement an access policy statement
@@ -40,6 +69,31 @@ type AccessStatement struct {
 	Action    interface{} `json:"action" yaml:"action"`
 	Resource  interface{} `json:"resource" yaml:"resource"`
 	Condition interface{} `json:"condition" yaml:"condition"`
+}
+
+// AccessStatementMutation an access policy mutation
+type AccessStatementMutation struct {
+	Effect    string      `json:"effect" yaml:"effect"`
+	Action    interface{} `json:"action" yaml:"action"`
+	Resource  interface{} `json:"resource" yaml:"resource"`
+	Condition interface{} `json:"condition" yaml:"condition"`
+}
+
+// ValidateCreate validates an AccessStatement create document
+func (c *AccessStatementMutation) ValidateCreate() error {
+	if c.Effect != AllowEffect && c.Effect != DenyEffect {
+		return fmt.Errorf("invalid access statement effect")
+	}
+	if !isValidArrayOrString(c.Action) {
+		return fmt.Errorf("invalid action")
+	}
+	if !isValidArrayOrString(c.Resource) {
+		return fmt.Errorf("invalid resource")
+	}
+	if !isMap(c.Condition) {
+		return fmt.Errorf("invalid condition")
+	}
+	return nil
 }
 
 // AccessRequest is the request for resource access

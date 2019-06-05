@@ -44,3 +44,36 @@ func arrayify(src interface{}) ([]interface{}, error) {
 	}
 	return m, nil
 }
+
+// IsString check if the interface is a string
+func isString(value interface{}) bool {
+	return getKind(value) == reflect.String
+}
+
+// IsMap check if the interface is a map
+func isMap(value interface{}) bool {
+	return getKind(value) == reflect.Map
+}
+
+// checks if string or array is empty
+func isValidArrayOrString(value interface{}) bool {
+	if value == nil {
+		return false
+	}
+	if isString(value) {
+		return value.(string) != ""
+	}
+	if isArrayLike(value) {
+		a, err := arrayify(value)
+		if err != nil {
+			return false
+		}
+		for _, v := range a {
+			if !isString(v) || v.(string) == "" {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
